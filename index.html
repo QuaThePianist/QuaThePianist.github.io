@@ -774,15 +774,16 @@ async def timeout(
     const muted = ready && player.isMuted && player.isMuted();
     npEm.textContent = !musicOn ? 'music is off · click to turn on' : playing && muted ? 'click anywhere to unmute ♪' : playing ? 'playing in the background ♪' : 'click anywhere to start ♪';
   }
-  // theme switches fade the old playlist out and the new one in, and ignore the player's
-  // in-between "stopped/buffering" states so nothing flickers or restarts mid-switch
-  let fadeTimer = null, switching = false, switchId = 0, switchGuard = null;
+  // every theme switch fades out, throws the old player away and builds a fresh one that only
+  // knows the new album, so the previous album can never keep playing
+  let fadeTimer = null, switching = false, switchId = 0, switchGuard = null, apiReady = false, fadeIn = false, heard = false;
   function fadeTo(target, ms, done) {
     clearInterval(fadeTimer);
+    if (!ready) { if (done) done(); return; }
     const from = player.getVolume(), steps = Math.max(1, Math.round(ms / 40));
     let i = 0;
     fadeTimer = setInterval(() => {
-      i++; player.setVolume(Math.round(from + (target - from) * i / steps));
+      i++; try { player.setVolume(Math.round(from + (target - from) * i / steps)); } catch (e) {}
       if (i >= steps) { clearInterval(fadeTimer); if (done) done(); }
     }, 40);
   }
@@ -797,51 +798,59 @@ async def timeout(
     musicOn = on; tog.checked = on;
     try { localStorage.setItem('qua-music', on ? 'on' : 'off'); } catch (e) {}
     if (ready) {
-      clearInterval(fadeTimer); endSwitch(); player.setVolume(vol);
+      clearInterval(fadeTimer); endSwitch(); fadeIn = false; player.setVolume(vol);
       if (on) start(); else player.pauseVideo();
     }
     status();
   }
-  function loadEra(p) {
-    if (!ready) return;
-    const id = ++switchId, opts = { listType: 'playlist', list: NP[p].list, index: 0 };
-    if (!musicOn || !playing && !switching) {
-      clearInterval(fadeTimer); endSwitch(); player.setVolume(vol);
-      if (musicOn) player.loadPlaylist(opts); else player.cuePlaylist(opts);
-      return;
-    }
-    switching = true;
-    fadeTo(0, 400, () => {
-      if (id !== switchId) return; // a newer theme click took over
-      player.loadPlaylist(opts);
-      clearTimeout(switchGuard);
-      // safety net: if the new playlist never starts, give the controls back
-      switchGuard = setTimeout(() => { endSwitch(); player.setVolume(vol); playing = player.getPlayerState() === 1; status(); }, 6000);
+  function createPlayer(p) {
+    clearInterval(fadeTimer);
+    if (player && player.destroy) { try { player.destroy(); } catch (e) {} }
+    ready = false; playing = false; player = null;
+    document.querySelector('.yt-hidden').innerHTML = '<div id="yt-player"></div>';
+    const myEra = p;
+    player = new YT.Player('yt-player', {
+      width: 200, height: 200,
+      playerVars: { listType: 'playlist', list: NP[p].list, autoplay: musicOn ? 1 : 0, controls: 0, playsinline: 1, loop: 1 },
+      events: {
+        onReady: () => {
+          if (myEra !== era) return; // a newer theme already replaced this player
+          ready = true;
+          player.setVolume(fadeIn ? 0 : vol);
+          if (heard) player.unMute();
+          if (musicOn) player.playVideo();
+          status();
+        },
+        onStateChange: e => {
+          if (myEra !== era) return;
+          if (e.data === 1) {
+            if (fadeIn) { fadeIn = false; player.setVolume(0); fadeTo(vol, 700); }
+            endSwitch();
+          }
+          if (switching) return; // still loading the new album
+          playing = e.data === 1 || e.data === 3; status(); // 3 = buffering, still "playing"
+        }
+      }
     });
+  }
+  function loadEra(p) {
+    if (!apiReady) return; // the player gets built with the current theme once YouTube loads
+    const id = ++switchId;
+    const wasPlaying = musicOn && playing;
+    switching = musicOn;
+    clearTimeout(switchGuard);
+    // safety net: if the new album never starts, give the controls back
+    if (musicOn) switchGuard = setTimeout(() => { endSwitch(); fadeIn = false; if (ready) { player.setVolume(vol); playing = player.getPlayerState() === 1; } status(); }, 8000);
+    const swap = () => { if (id !== switchId) return; fadeIn = wasPlaying; createPlayer(p); };
+    if (wasPlaying) fadeTo(0, 400, swap); else swap();
   }
 
   if (canEmbed) {
     document.getElementById('sound').hidden = false;
-    window.onYouTubeIframeAPIReady = () => {
-      player = new YT.Player('yt-player', {
-        width: 200, height: 200,
-        playerVars: { listType: 'playlist', list: NP[era].list, autoplay: 1, controls: 0, playsinline: 1, loop: 1 },
-        events: {
-          onReady: () => { ready = true; player.setVolume(vol); if (musicOn) player.playVideo(); },
-          onStateChange: e => {
-            if (switching) {
-              if (e.data !== 1) return; // still loading the new playlist
-              endSwitch(); player.setVolume(0); fadeTo(vol, 700);
-            }
-            playing = e.data === 1 || e.data === 3; status(); // 3 = buffering, still "playing"
-          }
-        }
-      });
-    };
+    window.onYouTubeIframeAPIReady = () => { apiReady = true; createPlayer(era); };
     const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
     // browsers only allow sound after the first click or key press, so start then
     // only the FIRST click/key on the page does anything (unmute + start); later clicks leave the music alone
-    let heard = false;
     const kick = e => {
       if (heard || !ready) return;
       heard = true;
