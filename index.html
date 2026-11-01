@@ -22,35 +22,43 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Permanent+Marker&family=Reenie+Beanie&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Rubik:wght@800;900&family=Rubik+Wet+Paint&family=Playfair+Display:ital,wght@1,900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Permanent+Marker&family=Reenie+Beanie&display=swap">
 <style>
 /* Layout: a scrapbook pinned to a colored wall. Paper stays paper in every era; only the wall, ink accents and tape change.
    Hero = glitter name + torn intro scrap + sharpie'd CD. Then a taped setlist beside an annotated code printout, a notebook page, and a tear-off flyer. */
+/* SOUR era (default): lilac wall, purple ink, sticker-sheet pink + yellow star, chunky rounded sticker type */
 :root {
   /* the wall (changes per era) */
-  --wall: #d6c6ee; --wall-ink: #1e1530; --wall-muted: #5b4a7a;
-  --accent: #6a35d0; --accent-2: #ee4f97; --on-accent: #ffffff; --hand-ink: #b8166a;
+  --wall: #cbb7ec; --wall-ink: #22163a; --wall-muted: #5a4a7d;
+  --accent: #6a35d0; --accent-2: #ffcf3a; --on-accent: #ffffff; --hand-ink: #b8166a;
   /* on paper (accents tuned to read on cream) */
   --paper-accent: #6a35d0; --mark: rgba(238, 79, 151, .38);
   /* paper never changes */
   --paper: #f8f5ee; --paper-2: #efe8da; --ink: #1b1620; --ink-soft: #5d5563; --rule: #c6d3e8; --margin: #e57b9a;
-  --display: "Archivo", "Arial Black", Impact, sans-serif;
+  --display: "Rubik", "Arial Rounded MT Bold", "Arial Black", sans-serif;
+  --display-weight: 900; --display-style: normal; --display-track: -.03em;
   --type: "Courier Prime", "Courier New", ui-monospace, monospace;
   --marker: "Permanent Marker", "Comic Sans MS", cursive;
   --pen: "Reenie Beanie", "Segoe Print", "Bradley Hand", cursive;
   color-scheme: light;
 }
+/* GUTS era: deep purple floor, blood-red + lilac, loud dripping rock lettering */
 :root[data-palette="guts"] {
-  --wall: #170b0f; --wall-ink: #f6e7ea; --wall-muted: #b88d99;
-  --accent: #d91f3a; --accent-2: #9b6bff; --on-accent: #ffffff; --hand-ink: #ff6b84;
-  --paper-accent: #b5122b; --mark: rgba(217, 31, 58, .28);
+  --wall: #2b0f4a; --wall-ink: #f4eaff; --wall-muted: #b9a2d8;
+  --accent: #ff2b48; --accent-2: #b98cff; --on-accent: #ffffff; --hand-ink: #ff7a8e;
+  --paper-accent: #b5122b; --mark: rgba(255, 43, 72, .28);
+  --display: "Rubik Wet Paint", "Impact", "Arial Black", sans-serif;
+  --display-weight: 400; --display-style: normal; --display-track: 0em;
   color-scheme: dark;
 }
-:root[data-palette="midnight"] {
-  --wall: #0d1330; --wall-ink: #e6eaff; --wall-muted: #8f9ad0;
-  --accent: #f7c948; --accent-2: #ff7aa8; --on-accent: #1a1430; --hand-ink: #ff8fb6;
-  --paper-accent: #2c3f9e; --mark: rgba(247, 201, 72, .55);
-  color-scheme: dark;
+/* you seem pretty sad for a girl so in love: blush pink, cherry ink, black-heel accents, romantic italic serif */
+:root[data-palette="prettysad"] {
+  --wall: #f7cfdb; --wall-ink: #2b1018; --wall-muted: #8c4a5e;
+  --accent: #d93d78; --accent-2: #1d1418; --on-accent: #ffffff; --hand-ink: #c2185b;
+  --paper-accent: #c2185b; --mark: rgba(217, 61, 120, .30);
+  --display: "Playfair Display", "Didot", "Georgia", serif;
+  --display-weight: 900; --display-style: italic; --display-track: -.02em;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -64,7 +72,9 @@ button { font: inherit; color: inherit; }
 
 .grain { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .10; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-:root[data-palette="guts"] .grain, :root[data-palette="midnight"] .grain { mix-blend-mode: screen; opacity: .06; }
+:root[data-palette="guts"] .grain { mix-blend-mode: screen; opacity: .07; }
+/* every display headline follows the era's typeface */
+.mark, .name, .title, .flyer h2 { font-family: var(--display) !important; font-weight: var(--display-weight) !important; font-style: var(--display-style); letter-spacing: var(--display-track); font-synthesis: none; }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 main, header, footer { position: relative; z-index: 2; }
 
@@ -297,9 +307,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     <a class="mark" href="#top">qua</a>
     <div class="eras" role="group" aria-label="Pick a color theme">
       <span class="pen hint" aria-hidden="true">pick an era →</span>
-      <button type="button" class="era" id="era-sour" data-p="sour" aria-pressed="true"><i style="background:#b79be6"></i>sour<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
-      <button type="button" class="era" id="era-guts" data-p="guts" aria-pressed="false"><i style="background:#d91f3a"></i>guts<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
-      <button type="button" class="era" id="era-midnight" data-p="midnight" aria-pressed="false"><i style="background:#0d1330"></i>midnight<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
+      <button type="button" class="era" id="era-sour" data-p="sour" aria-pressed="true"><i style="background:#9d74e0"></i>sour<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
+      <button type="button" class="era" id="era-guts" data-p="guts" aria-pressed="false"><i style="background:linear-gradient(135deg,#2b0f4a 50%,#ff2b48 50%)"></i>guts<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
+      <button type="button" class="era" id="era-prettysad" data-p="prettysad" aria-pressed="false"><i style="background:#f7cfdb"></i>pretty sad<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M8 22 C 6 8, 90 2, 94 18 S 30 40, 10 30 S 30 6, 60 6"/></svg></button>
     </div>
   </div>
 </header>
@@ -437,6 +447,66 @@ HitRemote.OnServerEvent:Connect(function(player, target)
 end)
 
 Players.PlayerRemoving:Connect(function(p) lastSwing[p] = nil end) @@ no memory leaks
+</script>
+
+<script type="text/plain" class="sample" data-tab="anti-exploit" data-lang="luau" data-file="AntiExploit.server.luau" data-blurb="roblox · remote spam + speed hack checks" data-foot="catch the cheaters, don't kick the kid with bad wifi.">
+-- anti-exploit: rate-limits remotes and catches speed/teleport hacks
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local MAX_CALLS = 10 -- per second, per player
+local MAX_SPEED = 32 -- studs/sec sideways (walkspeed 16 + headroom)
+local CHECK_EVERY = 0.5
+local calls, lastPos, strikes = {}, {}, {}
+
+local function flag(player, reason)
+  strikes[player] = (strikes[player] or 0) + 1
+  warn(("[anti-exploit] %s: %s (%d)"):format(player.Name, reason, strikes[player]))
+  if strikes[player] >= 3 then @@ 3 strikes, lag happens
+    player:Kick("unexpected client behavior")
+  end
+end
+
+-- wrap any RemoteEvent so spammers get cut off
+local function guard(remote, handler)
+  remote.OnServerEvent:Connect(function(player, ...)
+    local now = os.clock()
+    local log = calls[player] or {}
+    calls[player] = log
+    while log[1] and now - log[1] > 1 do table.remove(log, 1) end
+    if #log >= MAX_CALLS then return flag(player, "remote spam") end @@ max 10 calls a second
+    table.insert(log, now)
+    handler(player, ...)
+  end)
+end
+
+local elapsed = 0
+RunService.Heartbeat:Connect(function(dt)
+  elapsed += dt
+  if elapsed < CHECK_EVERY then return end
+  for _, player in Players:GetPlayers() do
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+      local prev = lastPos[player]
+      if prev then
+        local moved = root.Position - prev
+        local sideways = Vector3.new(moved.X, 0, moved.Z).Magnitude @@ falling doesn't count
+        if sideways / elapsed > MAX_SPEED then
+          root.CFrame = CFrame.new(prev) @@ rubber-band them back
+          flag(player, "moving too fast")
+        end
+      end
+      lastPos[player] = root.Position
+    end
+  end
+  elapsed = 0
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+  calls[p], lastPos[p], strikes[p] = nil, nil, nil @@ clean up when they leave
+end)
+
+return guard
 </script>
 
 <script type="text/plain" class="sample" data-tab="tickets" data-lang="js" data-file="commands/ticket.js" data-blurb="discord.js · /ticket command" data-foot="staff get pinged, nobody else can see it, and the user gets a quiet reply.">
@@ -681,9 +751,9 @@ async def timeout(
   /* ---------- eras ---------- */
   const eras = document.querySelectorAll('.era');
   const NP = {
-    sour: { title: 'you seem pretty sad for a girl so in love', url: 'https://www.youtube.com/watch?v=y_KdWNd7O88&list=PLi5o_VS7lQhJJhjg5OvpotOmk4VwgchXP&index=1', embed: 'https://www.youtube.com/embed/y_KdWNd7O88?list=PLi5o_VS7lQhJJhjg5OvpotOmk4VwgchXP&autoplay=1' },
-    guts: { title: 'GUTS', url: 'https://www.youtube.com/watch?v=n2BnbpjpRdo&list=PLDr-FOmzEgAgbeig370AmhYySj1UtBKjx', embed: 'https://www.youtube.com/embed/n2BnbpjpRdo?list=PLDr-FOmzEgAgbeig370AmhYySj1UtBKjx&autoplay=1' },
-    midnight: { title: 'SOUR', url: 'https://www.youtube.com/watch?v=hM2U8cb8lhI&list=PLHwvDXmNUa93H0TFpFvKK1wD3WupLzcHd', embed: 'https://www.youtube.com/embed/hM2U8cb8lhI?list=PLHwvDXmNUa93H0TFpFvKK1wD3WupLzcHd&autoplay=1' }
+    sour: { title: 'SOUR', url: 'https://www.youtube.com/watch?v=hM2U8cb8lhI&list=PLHwvDXmNUa93H0TFpFvKK1wD3WupLzcHd' },
+    guts: { title: 'GUTS', url: 'https://www.youtube.com/watch?v=n2BnbpjpRdo&list=PLDr-FOmzEgAgbeig370AmhYySj1UtBKjx' },
+    prettysad: { title: 'you seem pretty sad for a girl so in love', url: 'https://www.youtube.com/watch?v=y_KdWNd7O88&list=PLi5o_VS7lQhJJhjg5OvpotOmk4VwgchXP&index=1' }
   };
   for (const k in NP) NP[k].list = new URL(NP[k].url).searchParams.get('list');
 
@@ -852,7 +922,7 @@ async def timeout(
   }
   buildTabs();
 
-  /* ---------- background: butterflies (sour), bats (guts), headlights (midnight) ---------- */
+  /* ---------- background: butterflies (sour), bats (guts), falling hearts (pretty sad) ---------- */
   const cv = document.getElementById('fx'), ctx = cv.getContext('2d');
   let W = 0, H = 0, col = {};
   function size() { const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
@@ -861,7 +931,6 @@ async def timeout(
   const rnd = (a, b) => a + Math.random() * (b - a);
   const few = W < 700;
   const flyers = Array.from({ length: few ? 4 : 7 }, () => ({ x: rnd(0, W), y: rnd(0, H), vx: rnd(-.6, .6), vy: rnd(-.5, .3), s: rnd(.9, 1.5), ph: rnd(0, 6.28), c: Math.random() < .5 ? 'a' : 'b' }));
-  const lights = Array.from({ length: few ? 4 : 7 }, () => ({ y: rnd(.55, .97), x: Math.random(), len: rnd(90, 240), sp: rnd(1.5, 4), dir: Math.random() < .5 ? 1 : -1 }));
   let mx = -999, my = -999;
   addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
@@ -889,23 +958,29 @@ async def timeout(
     ctx.beginPath(); ctx.arc(0, -2, 3.5, 0, 6.28); ctx.fill();
     ctx.restore();
   }
-  function headlight(l, t) {
-    const span = W + 500, y = l.y * H;
-    const x = (((l.x * span + l.dir * t * 60 * l.sp) % span) + span) % span - 250;
-    const c = l.dir > 0 ? col.a : col.b;
-    const g = ctx.createLinearGradient(x, y, x - l.dir * l.len, y);
-    g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - l.dir * l.len, y); ctx.stroke();
-    ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 14;
-    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
+  // pretty sad era: hearts drifting down like petals off a swing
+  function heart(f, t) {
+    ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(Math.sin(t * 1.3 + f.ph) * .35); ctx.scale(f.s * 1.1, f.s * 1.1);
+    ctx.fillStyle = f.c === 'a' ? col.a : '#ffffff';
+    ctx.beginPath(); ctx.moveTo(0, 7);
+    ctx.bezierCurveTo(-13, -2, -7, -13, 0, -5); ctx.bezierCurveTo(7, -13, 13, -2, 0, 7); ctx.fill();
+    ctx.restore();
   }
   let last = 0;
   function frame(ms) {
     const t = ms / 1000, dt = Math.min((ms - last) / 16.7, 3) || 1; last = ms;
     const m = root.getAttribute('data-palette') || 'sour';
     ctx.clearRect(0, 0, W, H);
-    if (m === 'midnight') { ctx.globalAlpha = .55; lights.forEach(l => headlight(l, t)); }
+    if (m === 'prettysad') {
+      ctx.globalAlpha = .6;
+      for (const f of flyers) {
+        if (!reduce) {
+          f.y += (.35 + f.s * .3) * dt; f.x += Math.sin(t * 1.1 + f.ph) * .5 * dt;
+          if (f.y > H + 30) { f.y = -30; f.x = rnd(0, W); }
+        }
+        heart(f, t);
+      }
+    }
     else {
       ctx.globalAlpha = .5;
       for (const f of flyers) {
@@ -929,7 +1004,7 @@ async def timeout(
 
   let saved = 'sour';
   try { saved = localStorage.getItem('qua-era') || 'sour'; } catch (e) {}
-  setEra(saved);
+  setEra(NP[saved] ? saved : 'sour'); // old saved eras (like midnight) fall back to sour
   requestAnimationFrame(frame);
 })();
 </script>
