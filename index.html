@@ -159,6 +159,18 @@ mark { background: linear-gradient(100deg, transparent 2%, var(--mark) 4% 96%, t
 .str { color: var(--paper-accent); }
 .cm { color: #8c8577; font-style: italic; }
 .printout footer { padding: 14px 24px 0; font: 400 1.5rem/1.1 var(--pen); color: var(--hand-ink); }
+/* code binder: index tabs over the printout */
+.binder { min-width: 0; rotate: .6deg; }
+.binder .printout { rotate: 0deg; }
+.binder-hint { display: block; font-size: 1.6rem; margin: 0 0 6px 8px; rotate: -1.5deg; }
+.binder-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding-left: 14px; position: relative; z-index: 1; }
+.ctab { border: 0; padding: 10px 13px 14px; margin-bottom: -6px; border-radius: 9px 9px 0 0; cursor: pointer; background: var(--paper-2); color: var(--ink-soft); font: 700 .8rem/1 var(--type); translate: 0 5px; transition: translate .15s, background .2s; }
+.ctab:hover { translate: 0 1px; }
+.ctab[aria-selected="true"] { background: var(--paper); color: var(--ink); translate: 0 0; }
+.ctab .lang { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--paper-accent); margin-right: 7px; }
+.ln.noted code { background: linear-gradient(transparent 58%, var(--mark) 58% 92%, transparent 92%); }
+.printout.flip { animation: flip .35s cubic-bezier(.2,1.2,.4,1); }
+@keyframes flip { from { translate: 0 10px; rotate: -.8deg; } to { translate: 0 0; rotate: 0deg; } }
 
 /* notebook + license */
 .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 56px; align-items: center; }
@@ -354,32 +366,149 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
           </div>
         </div>
 
-        <div class="lift">
-          <article class="printout paper" aria-label="Annotated code sample: a Roblox save system">
-            <span class="tape" aria-hidden="true"></span>
-            <header><span class="label">PlayerData.server.luau</span><span>from my save system</span></header>
-            <div class="lines">
-              <div class="ln"><span class="no">1</span><code><span class="kw">local</span> DataStoreService = game:GetService(<span class="str">"DataStoreService"</span>)</code><span></span></div>
-              <div class="ln"><span class="no">2</span><code><span class="kw">local</span> store = DataStoreService:GetDataStore(<span class="str">"Players_v3"</span>)</code><span class="why">versioned so I can migrate</span></div>
-              <div class="ln"><span class="no">3</span><code> </code><span></span></div>
-              <div class="ln"><span class="no">4</span><code><span class="kw">local function</span> save(player)</code><span></span></div>
-              <div class="ln"><span class="no">5</span><code>  <span class="kw">for</span> attempt = 1, 3 <span class="kw">do</span></code><span class="why">3 tries before giving up</span></div>
-              <div class="ln"><span class="no">6</span><code>    <span class="kw">local</span> ok = <mark>pcall</mark>(<span class="kw">function</span>()</code><span></span></div>
-              <div class="ln"><span class="no">7</span><code>      store:<mark>UpdateAsync</mark>(player.UserId, <span class="kw">function</span>(old)</code><span class="why">not SetAsync. no overwrites</span></div>
-              <div class="ln"><span class="no">8</span><code>        <span class="kw">return</span> serialize(player, old)</code><span></span></div>
-              <div class="ln"><span class="no">9</span><code>      <span class="kw">end</span>)</code><span></span></div>
-              <div class="ln"><span class="no">10</span><code>    <span class="kw">end</span>)</code><span></span></div>
-              <div class="ln"><span class="no">11</span><code>    <span class="kw">if</span> ok <span class="kw">then return true end</span></code><span></span></div>
-              <div class="ln"><span class="no">12</span><code>    task.wait(2 ^ attempt)</code><span class="why">waits longer each time</span></div>
-              <div class="ln"><span class="no">13</span><code>  <span class="kw">end</span></code><span></span></div>
-              <div class="ln"><span class="no">14</span><code>  warn(<span class="str">"save failed:"</span>, player.Name)</code><span></span></div>
-              <div class="ln"><span class="no">15</span><code><span class="kw">end</span></code><span></span></div>
-              <div class="ln"><span class="no">16</span><code> </code><span></span></div>
-              <div class="ln"><span class="no">17</span><code>game.Players.PlayerRemoving:Connect(save)</code><span class="why">save when they leave</span></div>
-            </div>
-            <footer>players get mad when their stuff disappears. so it retries.</footer>
-          </article>
+        <div class="binder">
+          <span class="pen binder-hint" aria-hidden="true">more of my code, click the tabs ↓</span>
+          <div class="binder-tabs" role="tablist" aria-label="Code samples" id="code-tabs"></div>
+          <div class="lift">
+            <article class="printout paper" id="code-page" role="tabpanel">
+              <span class="tape" aria-hidden="true"></span>
+              <header><span class="label" id="code-file"></span><span id="code-blurb"></span></header>
+              <div class="lines" id="code-lines"></div>
+              <footer id="code-foot"></footer>
+            </article>
+          </div>
         </div>
+
+<!-- code samples: plain text, " @@ " starts a handwritten margin note -->
+<script type="text/plain" class="sample" data-tab="save system" data-lang="luau" data-file="PlayerData.server.luau" data-blurb="roblox · saving player data" data-foot="players get mad when their stuff disappears. so it retries.">
+local DataStoreService = game:GetService("DataStoreService")
+local store = DataStoreService:GetDataStore("Players_v3") @@ versioned so i can migrate
+
+local function save(player)
+  for attempt = 1, 3 do @@ 3 tries before giving up
+    local ok = pcall(function()
+      store:UpdateAsync(player.UserId, function(old) @@ not SetAsync. no overwrites
+        return serialize(player, old)
+      end)
+    end)
+    if ok then return true end
+    task.wait(2 ^ attempt) @@ waits longer each time
+  end
+  warn("save failed:", player.Name)
+end
+
+game.Players.PlayerRemoving:Connect(save) @@ save when they leave
+</script>
+
+<script type="text/plain" class="sample" data-tab="combat check" data-lang="luau" data-file="CombatServer.server.luau" data-blurb="roblox · server-side hit checks" data-foot="if the client could decide damage, exploiters would one-shot everyone.">
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HitRemote = ReplicatedStorage.Remotes.Hit
+
+local COOLDOWN = 0.4
+local MAX_RANGE = 12
+local lastSwing = {}
+
+HitRemote.OnServerEvent:Connect(function(player, target)
+  if typeof(target) ~= "Instance" or not target:IsA("Model") then return end @@ never trust what the client sends
+  local now = os.clock()
+  if now - (lastSwing[player] or 0) < COOLDOWN then return end @@ cooldown lives on the server
+  lastSwing[player] = now
+
+  local char = player.Character
+  local hum = target:FindFirstChildOfClass("Humanoid")
+  if not (char and hum and hum.Health > 0) then return end
+
+  local dist = (char:GetPivot().Position - target:GetPivot().Position).Magnitude
+  if dist > MAX_RANGE then return end @@ too far away = fake hit
+  hum:TakeDamage(15)
+end)
+
+Players.PlayerRemoving:Connect(function(p) lastSwing[p] = nil end) @@ no memory leaks
+</script>
+
+<script type="text/plain" class="sample" data-tab="tickets" data-lang="js" data-file="commands/ticket.js" data-blurb="discord.js · /ticket command" data-foot="staff get pinged, nobody else can see it, and the user gets a quiet reply.">
+// /ticket opens a private thread with the user + staff
+const { SlashCommandBuilder, ChannelType, MessageFlags } = require('discord.js');
+
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('ticket')
+    .setDescription('Open a support ticket')
+    .addStringOption(o => o.setName('reason').setDescription('What do you need help with?').setRequired(true)),
+
+  async execute(interaction) {
+    const reason = interaction.options.getString('reason');
+    const thread = await interaction.channel.threads.create({
+      name: `ticket-${interaction.user.username}`,
+      type: ChannelType.PrivateThread, @@ only them + staff
+      invitable: false,
+    });
+    await thread.members.add(interaction.user.id);
+    await thread.send(`<@&${process.env.STAFF_ROLE}> new ticket from ${interaction.user}: ${reason}`); @@ ids live in .env
+    await interaction.reply({ content: `opened ${thread}`, flags: MessageFlags.Ephemeral }); @@ only they see this
+  },
+};
+</script>
+
+<script type="text/plain" class="sample" data-tab="leveling" data-lang="py" data-file="cogs/levels.py" data-blurb="python · discord.py xp system" data-foot="spamming 50 messages gets you the same xp as one. that's the point.">
+# xp for chatting, with a cooldown so spam doesn't count
+import time
+import discord
+from discord.ext import commands
+
+XP_PER_MSG = 10
+COOLDOWN = 60  # seconds
+
+def level_for(xp: int) -> int:
+    return int((xp / 100) ** 0.5) @@ levels get slower to reach
+
+class Levels(commands.Cog):
+    def __init__(self, bot, db):
+        self.bot = bot
+        self.db = db
+        self.last_msg = {}
+
+    @commands.Cog.listener()
+    async def on_message(self, msg: discord.Message):
+        if msg.author.bot or not msg.guild:
+            return @@ ignore bots + DMs
+        now = time.time()
+        if now - self.last_msg.get(msg.author.id, 0) < COOLDOWN:
+            return
+        self.last_msg[msg.author.id] = now
+
+        xp = await self.db.add_xp(msg.guild.id, msg.author.id, XP_PER_MSG)
+        if level_for(xp) > level_for(xp - XP_PER_MSG):
+            await msg.channel.send(f"{msg.author.mention} hit level {level_for(xp)}!")
+</script>
+
+<script type="text/plain" class="sample" data-tab="moderation" data-lang="py" data-file="cogs/moderation.py" data-blurb="python · /timeout with mod logs" data-foot="every action gets logged so staff can see who did what.">
+# /timeout that checks roles and logs to the mod channel
+from datetime import timedelta
+import discord
+from discord import app_commands
+
+MOD_LOG_ID = 123456789012345678
+
+@app_commands.command(description="Timeout a member")
+@app_commands.default_permissions(moderate_members=True) @@ only mods see it
+async def timeout(
+    inter: discord.Interaction,
+    member: discord.Member,
+    minutes: app_commands.Range[int, 1, 10080], @@ max is 7 days
+    reason: str,
+):
+    if member.top_role >= inter.user.top_role:
+        return await inter.response.send_message("you can't timeout them", ephemeral=True) @@ no timing out admins
+    await member.timeout(timedelta(minutes=minutes), reason=reason)
+    await inter.response.send_message(f"timed out {member.mention} for {minutes}m", ephemeral=True)
+
+    log = inter.guild.get_channel(MOD_LOG_ID)
+    if log:
+        embed = discord.Embed(title="timeout", description=f"{member} by {inter.user}\n{reason}", color=0xE8263F)
+        await log.send(embed=embed)
+</script>
       </div>
     </div>
   </section>
@@ -476,6 +605,52 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     el.style.clipPath = `polygon(${pts.join(',')})`;
   });
 
+  /* ---------- code binder: samples live in <script type="text/plain" class="sample"> ---------- */
+  const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const KW = {
+    luau: 'local function end if then else elseif for in do while return not and or nil true false repeat until break continue',
+    js: 'const let var function async await return if else for of new module exports require true false null this',
+    py: 'import from as def async await return if elif else for in not and or None True False class self with try except lambda'
+  };
+  const CM = { luau: '--.*', js: '//.*', py: '#.*' };
+  const STR = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/.source;
+  function hl(src, lang) {
+    const re = new RegExp('(' + CM[lang] + ')|(' + STR + ')|\\b(' + KW[lang].split(' ').join('|') + ')\\b', 'g');
+    let out = '', last = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index)) + '<span class="' + (m[1] ? 'cm' : m[2] ? 'str' : 'kw') + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+  const samples = [...document.querySelectorAll('script.sample')].map(s => ({
+    tab: s.dataset.tab, lang: s.dataset.lang, file: s.dataset.file, blurb: s.dataset.blurb, foot: s.dataset.foot,
+    lines: s.textContent.replace(/^\r?\n/, '').replace(/\s+$/, '').split(/\r?\n/)
+  }));
+  const codeTabs = document.getElementById('code-tabs'), codePage = document.getElementById('code-page');
+  function showSample(i, animate) {
+    const s = samples[i];
+    codeTabs.querySelectorAll('.ctab').forEach((b, j) => b.setAttribute('aria-selected', String(j === i)));
+    document.getElementById('code-file').textContent = s.file;
+    document.getElementById('code-blurb').textContent = s.blurb;
+    document.getElementById('code-foot').textContent = s.foot;
+    document.getElementById('code-lines').innerHTML = s.lines.map((l, n) => {
+      const parts = l.split(' @@ '), code = parts[0].replace(/\s+$/, ''), note = parts[1];
+      return '<div class="ln' + (note ? ' noted' : '') + '"><span class="no">' + (n + 1) + '</span><code>' + (hl(code, s.lang) || ' ') + '</code>' +
+        (note ? '<span class="why">' + esc(note) + '</span>' : '<span></span>') + '</div>';
+    }).join('');
+    codePage.setAttribute('aria-labelledby', 'ctab-' + i);
+    if (animate && !reduce) { codePage.classList.remove('flip'); void codePage.offsetWidth; codePage.classList.add('flip'); }
+  }
+  samples.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ctab'; b.id = 'ctab-' + i; b.setAttribute('role', 'tab');
+    b.innerHTML = '<span class="lang">' + esc(s.lang) + '</span>' + esc(s.tab);
+    b.addEventListener('click', () => showSample(i, true));
+    codeTabs.appendChild(b);
+  });
+  if (samples.length) showSample(0, false);
+
   /* ---------- glitter for the name, regenerated per era ---------- */
   function glitter() {
     const c = document.createElement('canvas'); c.width = c.height = 160;
@@ -514,7 +689,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   function status() {
     np.classList.toggle('playing', playing);
     if (!canEmbed) { npEm.textContent = 'play it on youtube ↗'; return; }
-    npEm.textContent = !musicOn ? 'music is off · click to turn on' : playing ? 'playing in the background ♪' : 'click anywhere to start ♪';
+    const muted = ready && player.isMuted && player.isMuted();
+    npEm.textContent = !musicOn ? 'music is off · click to turn on' : playing && muted ? 'click anywhere to unmute ♪' : playing ? 'playing in the background ♪' : 'click anywhere to start ♪';
   }
   // theme switches fade the old playlist out and the new one in, and ignore the player's
   // in-between "stopped/buffering" states so nothing flickers or restarts mid-switch
@@ -529,7 +705,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
     }, 40);
   }
   function endSwitch() { switching = false; clearTimeout(switchGuard); }
-  function start() { if (ready && musicOn && !playing && !switching) { player.unMute(); player.setVolume(vol); player.playVideo(); } }
+  function start() {
+    if (!ready || !musicOn || switching) return;
+    player.unMute(); player.setVolume(vol);
+    const st = player.getPlayerState();
+    if (st !== 1 && st !== 3) player.playVideo(); // don't re-trigger while playing or buffering
+  }
   function setMusic(on) {
     musicOn = on; tog.checked = on;
     try { localStorage.setItem('qua-music', on ? 'on' : 'off'); } catch (e) {}
@@ -570,14 +751,22 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
               if (e.data !== 1) return; // still loading the new playlist
               endSwitch(); player.setVolume(0); fadeTo(vol, 700);
             }
-            playing = e.data === 1; status();
+            playing = e.data === 1 || e.data === 3; status(); // 3 = buffering, still "playing"
           }
         }
       });
     };
     const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
     // browsers only allow sound after the first click or key press, so start then
-    const kick = e => { if (e.target.closest && e.target.closest('#np, #sound, .era')) return; start(); };
+    // only the FIRST click/key on the page does anything (unmute + start); later clicks leave the music alone
+    let heard = false;
+    const kick = e => {
+      if (heard || !ready) return;
+      heard = true;
+      player.unMute(); player.setVolume(vol);
+      if (!(e.target.closest && e.target.closest('#np, #sound, .era'))) start();
+      status();
+    };
     ['pointerdown', 'keydown', 'touchstart'].forEach(t => addEventListener(t, kick, { passive: true }));
     np.addEventListener('click', e => {
       e.preventDefault();
